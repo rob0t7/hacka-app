@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getHackathonById, getHackathonIdeas, getTeamsByHackathon } from '@/lib/queries';
+import { getHackathonById, getHackathonIdeas, getTeamsByHackathon, updateHackathon } from '@/lib/queries';
 
 export async function GET(
   request: NextRequest,
@@ -27,5 +27,49 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching hackathon:', error);
     return NextResponse.json({ error: 'Failed to fetch hackathon' }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const hackathonId = parseInt(id);
+    const body = await request.json();
+    const { name, description, startDate, endDate, mode } = body;
+
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (mode && mode !== 'select' && mode !== 'random') {
+      return NextResponse.json(
+        { error: 'Mode must be either "select" or "random"' },
+        { status: 400 }
+      );
+    }
+
+    const hackathon = await updateHackathon(
+      hackathonId,
+      name,
+      description || null,
+      startDate || null,
+      endDate || null,
+      mode || 'select'
+    );
+
+    if (!hackathon) {
+      return NextResponse.json({ error: 'Hackathon not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(hackathon);
+  } catch (error) {
+    console.error('Error updating hackathon:', error);
+    return NextResponse.json({ error: 'Failed to update hackathon' }, { status: 500 });
   }
 }

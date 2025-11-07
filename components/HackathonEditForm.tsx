@@ -2,54 +2,58 @@
 
 import { useState } from 'react';
 
-interface HackathonFormProps {
-  onHackathonCreated: () => void;
+interface Hackathon {
+  id: number;
+  name: string;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  mode: 'select' | 'random';
 }
 
-export default function HackathonForm({ onHackathonCreated }: HackathonFormProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [mode, setMode] = useState<'select' | 'random'>('select');
+interface HackathonEditFormProps {
+  hackathon: Hackathon;
+  onHackathonUpdated: () => void;
+  onCancel: () => void;
+}
+
+export default function HackathonEditForm({ hackathon, onHackathonUpdated, onCancel }: HackathonEditFormProps) {
+  const [name, setName] = useState(hackathon.name);
+  const [description, setDescription] = useState(hackathon.description || '');
+  const [startDate, setStartDate] = useState(
+    hackathon.start_date ? new Date(hackathon.start_date).toISOString().split('T')[0] : ''
+  );
+  const [endDate, setEndDate] = useState(
+    hackathon.end_date ? new Date(hackathon.end_date).toISOString().split('T')[0] : ''
+  );
+  const [mode, setMode] = useState<'select' | 'random'>(hackathon.mode);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const username = localStorage.getItem('username') || prompt('Enter your username:');
-    if (!username) return;
-
-    localStorage.setItem('username', username);
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/hackathons', {
-        method: 'POST',
+      const response = await fetch(`/api/hackathons/${hackathon.id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           description: description || null,
           startDate: startDate || null,
           endDate: endDate || null,
-          mode,
-          username
+          mode
         })
       });
 
       if (response.ok) {
-        setName('');
-        setDescription('');
-        setStartDate('');
-        setEndDate('');
-        setMode('select');
-        onHackathonCreated();
+        onHackathonUpdated();
       } else {
-        alert('Failed to create hackathon');
+        alert('Failed to update hackathon');
       }
     } catch (error) {
-      console.error('Error creating hackathon:', error);
-      alert('Failed to create hackathon');
+      console.error('Error updating hackathon:', error);
+      alert('Failed to update hackathon');
     } finally {
       setIsSubmitting(false);
     }
@@ -60,7 +64,7 @@ export default function HackathonForm({ onHackathonCreated }: HackathonFormProps
       onSubmit={handleSubmit}
       className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6"
     >
-      <h2 className="text-xl font-semibold mb-4">Create New Hackathon</h2>
+      <h2 className="text-xl font-semibold mb-4">Edit Hackathon</h2>
 
       <div className="space-y-4">
         <div>
@@ -160,13 +164,23 @@ export default function HackathonForm({ onHackathonCreated }: HackathonFormProps
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
-        >
-          {isSubmitting ? 'Creating...' : 'Create Hackathon'}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isSubmitting ? 'Updating...' : 'Update Hackathon'}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </form>
   );

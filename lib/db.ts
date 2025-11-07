@@ -61,6 +61,7 @@ export async function initDatabase() {
         description TEXT,
         start_date TIMESTAMP,
         end_date TIMESTAMP,
+        mode TEXT DEFAULT 'select' CHECK(mode IN ('select', 'random')),
         created_by INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (created_by) REFERENCES users(id)

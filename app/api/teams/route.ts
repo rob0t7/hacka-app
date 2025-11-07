@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createTeam, getOrCreateUser } from '@/lib/queries';
+import { createTeam, getOrCreateUser, getHackathonById, getHackathonIdeas } from '@/lib/queries';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,29 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await getOrCreateUser(username);
-    const team = await createTeam(name, hackathonId, ideaId || null, user.id);
+
+    // Get hackathon to check mode
+    const hackathon = await getHackathonById(hackathonId);
+    if (!hackathon) {
+      return NextResponse.json(
+        { error: 'Hackathon not found' },
+        { status: 404 }
+      );
+    }
+
+    let finalIdeaId = ideaId || null;
+
+    // If hackathon is in random mode and no ideaId is provided, randomly assign one
+    if (hackathon.mode === 'random' && !ideaId) {
+      const ideas = await getHackathonIdeas(hackathonId);
+      if (ideas.length > 0) {
+        // Randomly select an idea
+        const randomIndex = Math.floor(Math.random() * ideas.length);
+        finalIdeaId = ideas[randomIndex].id;
+      }
+    }
+
+    const team = await createTeam(name, hackathonId, finalIdeaId, user.id);
 
     return NextResponse.json(team, { status: 201 });
   } catch (error) {

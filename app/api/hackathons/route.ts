@@ -14,11 +14,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, startDate, endDate, username } = body;
+    const { name, description, startDate, endDate, mode, username } = body;
 
     if (!name || !username) {
       return NextResponse.json(
         { error: 'Name and username are required' },
+        { status: 400 }
+      );
+    }
+
+    if (mode && mode !== 'select' && mode !== 'random') {
+      return NextResponse.json(
+        { error: 'Mode must be either "select" or "random"' },
         { status: 400 }
       );
     }
@@ -29,6 +36,7 @@ export async function POST(request: NextRequest) {
       description || null,
       startDate || null,
       endDate || null,
+      mode || 'select',
       user.id
     );
 

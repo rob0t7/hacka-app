@@ -9,11 +9,12 @@ interface Idea {
 
 interface TeamFormProps {
   hackathonId: number;
+  hackathonMode: 'select' | 'random';
   ideas: Idea[];
   onTeamCreated: () => void;
 }
 
-export default function TeamForm({ hackathonId, ideas, onTeamCreated }: TeamFormProps) {
+export default function TeamForm({ hackathonId, hackathonMode, ideas, onTeamCreated }: TeamFormProps) {
   const [name, setName] = useState('');
   const [ideaId, setIdeaId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,24 +78,34 @@ export default function TeamForm({ hackathonId, ideas, onTeamCreated }: TeamForm
           />
         </div>
 
-        <div>
-          <label htmlFor="ideaSelect" className="block text-sm font-medium mb-2">
-            Select Idea (Optional)
-          </label>
-          <select
-            id="ideaSelect"
-            value={ideaId}
-            onChange={(e) => setIdeaId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-900"
-          >
-            <option value="">-- No idea selected --</option>
-            {ideas.map((idea) => (
-              <option key={idea.id} value={idea.id}>
-                {idea.title}
-              </option>
-            ))}
-          </select>
-        </div>
+        {hackathonMode === 'select' && (
+          <div>
+            <label htmlFor="ideaSelect" className="block text-sm font-medium mb-2">
+              Select Idea (Optional)
+            </label>
+            <select
+              id="ideaSelect"
+              value={ideaId}
+              onChange={(e) => setIdeaId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-900"
+            >
+              <option value="">-- No idea selected --</option>
+              {ideas.map((idea) => (
+                <option key={idea.id} value={idea.id}>
+                  {idea.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {hackathonMode === 'random' && ideas.length > 0 && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>Hard Consulting Mode:</strong> Your team will be randomly assigned an idea from the hackathon pool when created.
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"

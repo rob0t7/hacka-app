@@ -198,6 +198,7 @@ export interface Hackathon {
   description: string | null;
   start_date: string | null;
   end_date: string | null;
+  mode: 'select' | 'random';
   created_by: number;
   creator_username: string;
   created_at: string;
@@ -224,16 +225,37 @@ export async function createHackathon(
   description: string | null,
   startDate: string | null,
   endDate: string | null,
+  mode: 'select' | 'random',
   userId: number
 ): Promise<Hackathon> {
   const result = await sql`
-    INSERT INTO hackathons (name, description, start_date, end_date, created_by)
-    VALUES (${name}, ${description}, ${startDate}, ${endDate}, ${userId})
+    INSERT INTO hackathons (name, description, start_date, end_date, mode, created_by)
+    VALUES (${name}, ${description}, ${startDate}, ${endDate}, ${mode}, ${userId})
     RETURNING id
   `;
   const hackathonId = result.rows[0].id;
   const hackathon = await getHackathonById(hackathonId);
   return hackathon!;
+}
+
+export async function updateHackathon(
+  id: number,
+  name: string,
+  description: string | null,
+  startDate: string | null,
+  endDate: string | null,
+  mode: 'select' | 'random'
+): Promise<Hackathon | null> {
+  await sql`
+    UPDATE hackathons
+    SET name = ${name},
+        description = ${description},
+        start_date = ${startDate},
+        end_date = ${endDate},
+        mode = ${mode}
+    WHERE id = ${id}
+  `;
+  return getHackathonById(id);
 }
 
 export async function getHackathonById(id: number): Promise<Hackathon | null> {
@@ -248,7 +270,7 @@ export async function getHackathonById(id: number): Promise<Hackathon | null> {
     LEFT JOIN hackathon_ideas hi ON h.id = hi.hackathon_id
     LEFT JOIN teams t ON h.id = t.hackathon_id
     WHERE h.id = ${id}
-    GROUP BY h.id, h.name, h.description, h.start_date, h.end_date, h.created_by, h.created_at, u.username
+    GROUP BY h.id, h.name, h.description, h.start_date, h.end_date, h.mode, h.created_by, h.created_at, u.username
   `;
   return result.rows[0] as Hackathon | null;
 }
@@ -264,7 +286,7 @@ export async function getAllHackathons(): Promise<Hackathon[]> {
     JOIN users u ON h.created_by = u.id
     LEFT JOIN hackathon_ideas hi ON h.id = hi.hackathon_id
     LEFT JOIN teams t ON h.id = t.hackathon_id
-    GROUP BY h.id, h.name, h.description, h.start_date, h.end_date, h.created_by, h.created_at, u.username
+    GROUP BY h.id, h.name, h.description, h.start_date, h.end_date, h.mode, h.created_by, h.created_at, u.username
     ORDER BY h.created_at DESC
   `;
   return result.rows as Hackathon[];

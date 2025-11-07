@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import TeamForm from '@/components/TeamForm';
 import IdeaSelector from '@/components/IdeaSelector';
+import HackathonEditForm from '@/components/HackathonEditForm';
 
 interface Idea {
   id: number;
@@ -31,6 +32,7 @@ interface Hackathon {
   description: string | null;
   start_date: string | null;
   end_date: string | null;
+  mode: 'select' | 'random';
   creator_username: string;
   ideas: Idea[];
   teams: Team[];
@@ -44,6 +46,7 @@ export default function HackathonDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [showIdeaSelector, setShowIdeaSelector] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [username, setUsername] = useState('');
 
   const fetchHackathon = async () => {
@@ -73,6 +76,11 @@ export default function HackathonDetailPage() {
 
   const handleIdeasUpdated = () => {
     setShowIdeaSelector(false);
+    fetchHackathon();
+  };
+
+  const handleHackathonUpdated = () => {
+    setShowEditForm(false);
     fetchHackathon();
   };
 
@@ -181,13 +189,21 @@ export default function HackathonDetailPage() {
         </div>
 
         <header className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h1 className="text-4xl font-bold mb-2">{hackathon.name}</h1>
+          <div className="flex justify-between items-start mb-2">
+            <h1 className="text-4xl font-bold">{hackathon.name}</h1>
+            <button
+              onClick={() => setShowEditForm(!showEditForm)}
+              className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+            >
+              {showEditForm ? 'Cancel Edit' : 'Edit'}
+            </button>
+          </div>
           {hackathon.description && (
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               {hackathon.description}
             </p>
           )}
-          <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
             <div>
               <span className="font-medium">Start:</span> {formatDate(hackathon.start_date)}
             </div>
@@ -195,10 +211,28 @@ export default function HackathonDetailPage() {
               <span className="font-medium">End:</span> {formatDate(hackathon.end_date)}
             </div>
             <div>
+              <span className="font-medium">Mode:</span>{' '}
+              <span className={`px-2 py-1 rounded text-xs ${
+                hackathon.mode === 'random'
+                  ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+                  : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+              }`}>
+                {hackathon.mode === 'random' ? 'Hard Consulting Mode' : 'Teams Select Ideas'}
+              </span>
+            </div>
+            <div>
               <span className="font-medium">Created by:</span> {hackathon.creator_username}
             </div>
           </div>
         </header>
+
+        {showEditForm && (
+          <HackathonEditForm
+            hackathon={hackathon}
+            onHackathonUpdated={handleHackathonUpdated}
+            onCancel={() => setShowEditForm(false)}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Ideas Section */}
@@ -270,6 +304,7 @@ export default function HackathonDetailPage() {
             {showTeamForm && (
               <TeamForm
                 hackathonId={parseInt(hackathonId)}
+                hackathonMode={hackathon.mode}
                 ideas={hackathon.ideas}
                 onTeamCreated={handleTeamCreated}
               />
