@@ -11,7 +11,7 @@ export default function HackathonForm({ onHackathonCreated }: HackathonFormProps
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [mode, setMode] = useState<'select' | 'random'>('select');
+  const [mode, setMode] = useState<'select' | 'random' | 'team-random'>('select');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +131,7 @@ export default function HackathonForm({ onHackathonCreated }: HackathonFormProps
                 name="mode"
                 value="select"
                 checked={mode === 'select'}
-                onChange={(e) => setMode(e.target.value as 'select' | 'random')}
+                onChange={(e) => setMode(e.target.value as 'select' | 'random' | 'team-random')}
                 className="mt-1"
               />
               <div>
@@ -147,13 +147,29 @@ export default function HackathonForm({ onHackathonCreated }: HackathonFormProps
                 name="mode"
                 value="random"
                 checked={mode === 'random'}
-                onChange={(e) => setMode(e.target.value as 'select' | 'random')}
+                onChange={(e) => setMode(e.target.value as 'select' | 'random' | 'team-random')}
                 className="mt-1"
               />
               <div>
                 <div className="font-medium">Hard Consulting Mode</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Ideas are randomly assigned to teams when they are created - just like in consulting!
+                </div>
+              </div>
+            </label>
+            <label className="flex items-start gap-3 p-3 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+              <input
+                type="radio"
+                name="mode"
+                value="team-random"
+                checked={mode === 'team-random'}
+                onChange={(e) => setMode(e.target.value as 'select' | 'random' | 'team-random')}
+                className="mt-1"
+              />
+              <div>
+                <div className="font-medium">Random Team Assignment</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Participants join the hackathon and get randomly assigned to balanced teams
                 </div>
               </div>
             </label>

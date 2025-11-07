@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getHackathonById, getHackathonIdeas, getTeamsByHackathon, updateHackathon } from '@/lib/queries';
+import { getHackathonParticipants } from '@/lib/participant-queries';
 
 export async function GET(
   request: NextRequest,
@@ -19,10 +20,17 @@ export async function GET(
       return NextResponse.json({ error: 'Hackathon not found' }, { status: 404 });
     }
 
+    // Fetch participants for team-random mode
+    let participants: string[] = [];
+    if (hackathon.mode === 'team-random') {
+      participants = await getHackathonParticipants(hackathonId);
+    }
+
     return NextResponse.json({
       ...hackathon,
       ideas,
-      teams
+      teams,
+      participants
     });
   } catch (error) {
     console.error('Error fetching hackathon:', error);
@@ -47,9 +55,9 @@ export async function PUT(
       );
     }
 
-    if (mode && mode !== 'select' && mode !== 'random') {
+    if (mode && mode !== 'select' && mode !== 'random' && mode !== 'team-random') {
       return NextResponse.json(
-        { error: 'Mode must be either "select" or "random"' },
+        { error: 'Mode must be "select", "random", or "team-random"' },
         { status: 400 }
       );
     }

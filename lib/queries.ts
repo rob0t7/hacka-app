@@ -198,12 +198,13 @@ export interface Hackathon {
   description: string | null;
   start_date: string | null;
   end_date: string | null;
-  mode: 'select' | 'random';
+  mode: 'select' | 'random' | 'team-random';
   created_by: number;
   creator_username: string;
   created_at: string;
   idea_count?: number;
   team_count?: number;
+  participant_count?: number;
 }
 
 export interface Team {
@@ -225,7 +226,7 @@ export async function createHackathon(
   description: string | null,
   startDate: string | null,
   endDate: string | null,
-  mode: 'select' | 'random',
+  mode: 'select' | 'random' | 'team-random',
   userId: number
 ): Promise<Hackathon> {
   const result = await sql`
@@ -244,7 +245,7 @@ export async function updateHackathon(
   description: string | null,
   startDate: string | null,
   endDate: string | null,
-  mode: 'select' | 'random'
+  mode: 'select' | 'random' | 'team-random'
 ): Promise<Hackathon | null> {
   await sql`
     UPDATE hackathons

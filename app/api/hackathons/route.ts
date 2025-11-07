@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (mode && mode !== 'select' && mode !== 'random') {
+    if (mode && mode !== 'select' && mode !== 'random' && mode !== 'team-random') {
       return NextResponse.json(
-        { error: 'Mode must be either "select" or "random"' },
+        { error: 'Mode must be "select", "random", or "team-random"' },
         { status: 400 }
       );
     }

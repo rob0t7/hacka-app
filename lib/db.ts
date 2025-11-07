@@ -61,7 +61,7 @@ export async function initDatabase() {
         description TEXT,
         start_date TIMESTAMP,
         end_date TIMESTAMP,
-        mode TEXT DEFAULT 'select' CHECK(mode IN ('select', 'random')),
+        mode TEXT DEFAULT 'select' CHECK(mode IN ('select', 'random', 'team-random')),
         created_by INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (created_by) REFERENCES users(id)
@@ -105,6 +105,19 @@ export async function initDatabase() {
         joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(team_id, user_id),
         FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+
+    // Hackathon participants table (for team-random mode)
+    await sql`
+      CREATE TABLE IF NOT EXISTS hackathon_participants (
+        id SERIAL PRIMARY KEY,
+        hackathon_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(hackathon_id, user_id),
+        FOREIGN KEY (hackathon_id) REFERENCES hackathons(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `;

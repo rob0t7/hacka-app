@@ -32,10 +32,11 @@ interface Hackathon {
   description: string | null;
   start_date: string | null;
   end_date: string | null;
-  mode: 'select' | 'random';
+  mode: 'select' | 'random' | 'team-random';
   creator_username: string;
   ideas: Idea[];
   teams: Team[];
+  participants?: string[];
 }
 
 export default function HackathonDetailPage() {
@@ -146,6 +147,91 @@ export default function HackathonDetailPage() {
     }
   };
 
+  const handleJoinHackathon = async () => {
+    if (!username) {
+      const newUsername = prompt('Enter your username to join:');
+      if (!newUsername || !newUsername.trim()) return;
+      localStorage.setItem('username', newUsername.trim());
+      setUsername(newUsername.trim());
+    }
+
+    try {
+      const response = await fetch(`/api/hackathons/${hackathonId}/participants`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username || newUsername })
+      });
+
+      if (response.ok) {
+        alert('✓ Successfully joined the hackathon!');
+        fetchHackathon();
+      } else {
+        const error = await response.json();
+        alert(`Failed to join: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error joining hackathon:', error);
+      alert('Failed to join. Please try again.');
+    }
+  };
+
+  const handleLeaveHackathon = async () => {
+    if (!username) return;
+
+    const confirmed = confirm('Are you sure you want to leave this hackathon?');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/hackathons/${hackathonId}/participants?username=${encodeURIComponent(username)}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('✓ Successfully left the hackathon');
+        fetchHackathon();
+      } else {
+        const error = await response.json();
+        alert(`Failed to leave: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error leaving hackathon:', error);
+      alert('Failed to leave. Please try again.');
+    }
+  };
+
+  const handleRandomizeTeams = async () => {
+    const teamSizeStr = prompt('Enter desired team size (default is 4):', '4');
+    if (!teamSizeStr) return;
+
+    const teamSize = parseInt(teamSizeStr);
+    if (isNaN(teamSize) || teamSize < 1) {
+      alert('Please enter a valid team size');
+      return;
+    }
+
+    const confirmed = confirm(`This will delete all existing teams and create new balanced teams of size ${teamSize}. Continue?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/hackathons/${hackathonId}/randomize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamSize })
+      });
+
+      if (response.ok) {
+        alert('✓ Teams randomized successfully!');
+        fetchHackathon();
+      } else {
+        const error = await response.json();
+        alert(`Failed to randomize teams: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error randomizing teams:', error);
+      alert('Failed to randomize teams. Please try again.');
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -215,9 +301,15 @@ export default function HackathonDetailPage() {
               <span className={`px-2 py-1 rounded text-xs ${
                 hackathon.mode === 'random'
                   ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+                  : hackathon.mode === 'team-random'
+                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                   : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
               }`}>
-                {hackathon.mode === 'random' ? 'Hard Consulting Mode' : 'Teams Select Ideas'}
+                {hackathon.mode === 'random'
+                  ? 'Hard Consulting Mode'
+                  : hackathon.mode === 'team-random'
+                  ? 'Random Team Assignment'
+                  : 'Teams Select Ideas'}
               </span>
             </div>
             <div>
