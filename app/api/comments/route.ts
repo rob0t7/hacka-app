@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'ideaId is required' }, { status: 400 });
     }
 
-    const comments = getCommentsByIdeaId(parseInt(ideaId));
+    const comments = await getCommentsByIdeaId(parseInt(ideaId));
     return NextResponse.json(comments);
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = getOrCreateUser(username);
-    const comment = createComment(ideaId, user.id, content);
+    const user = await getOrCreateUser(username);
+    const comment = await createComment(ideaId, user.id, content);
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

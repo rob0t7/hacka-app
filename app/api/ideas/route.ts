@@ -4,7 +4,7 @@ import { getAllIdeas, createIdea, getOrCreateUser } from '@/lib/queries';
 export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-    const ideas = getAllIdeas(userId ? parseInt(userId) : undefined);
+    const ideas = await getAllIdeas(userId ? parseInt(userId) : undefined);
     return NextResponse.json(ideas);
   } catch (error) {
     console.error('Error fetching ideas:', error);
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = getOrCreateUser(username);
-    const idea = createIdea(title, description, user.id);
+    const user = await getOrCreateUser(username);
+    const idea = await createIdea(title, description, user.id);
 
     return NextResponse.json(idea, { status: 201 });
   } catch (error) {

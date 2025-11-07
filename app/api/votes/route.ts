@@ -20,15 +20,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = getOrCreateUser(username);
+    const user = await getOrCreateUser(username);
 
     let idea;
     if (voteType === 0) {
       // Remove vote
-      idea = removeVote(ideaId, user.id);
+      idea = await removeVote(ideaId, user.id);
     } else {
       // Upvote or downvote
-      idea = upsertVote(ideaId, user.id, voteType);
+      idea = await upsertVote(ideaId, user.id, voteType);
     }
 
     return NextResponse.json(idea);
