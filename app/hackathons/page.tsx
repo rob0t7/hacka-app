@@ -64,12 +64,20 @@ export default function HackathonsPage() {
                 Create and manage hackathons with ideas and teams
               </p>
             </div>
-            <Link
-              href="/"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-            >
-              ← Back to Ideas
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/"
+                className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                ← Home
+              </Link>
+              <Link
+                href="/ideas"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                Browse Ideas
+              </Link>
+            </div>
           </div>
         </header>
 
