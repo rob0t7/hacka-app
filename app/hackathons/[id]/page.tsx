@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import TeamForm from '@/components/TeamForm';
-import IdeaSelector from '@/components/IdeaSelector';
-import HackathonEditForm from '@/components/HackathonEditForm';
+import HackathonEditForm from "@/components/HackathonEditForm";
+import IdeaSelector from "@/components/IdeaSelector";
+import TeamForm from "@/components/TeamForm";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Idea {
   id: number;
@@ -32,7 +32,7 @@ interface Hackathon {
   description: string | null;
   start_date: string | null;
   end_date: string | null;
-  mode: 'select' | 'random' | 'team-random';
+  mode: "select" | "random";
   creator_username: string;
   ideas: Idea[];
   teams: Team[];
@@ -48,7 +48,7 @@ export default function HackathonDetailPage() {
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [showIdeaSelector, setShowIdeaSelector] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
 
   const fetchHackathon = async () => {
     try {
@@ -58,7 +58,7 @@ export default function HackathonDetailPage() {
         setHackathon(data);
       }
     } catch (error) {
-      console.error('Error fetching hackathon:', error);
+      console.error("Error fetching hackathon:", error);
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +66,7 @@ export default function HackathonDetailPage() {
 
   useEffect(() => {
     fetchHackathon();
-    const storedUsername = localStorage.getItem('username') || '';
+    const storedUsername = localStorage.getItem("username") || "";
     setUsername(storedUsername);
   }, [hackathonId]);
 
@@ -87,9 +87,9 @@ export default function HackathonDetailPage() {
 
   const handleJoinTeam = async (teamId: number, teamName: string) => {
     if (!username) {
-      const newUsername = prompt('Enter your username to join:');
+      const newUsername = prompt("Enter your username to join:");
       if (!newUsername || !newUsername.trim()) return;
-      localStorage.setItem('username', newUsername.trim());
+      localStorage.setItem("username", newUsername.trim());
       setUsername(newUsername.trim());
       await joinTeam(teamId, newUsername.trim(), teamName);
     } else {
@@ -100,9 +100,9 @@ export default function HackathonDetailPage() {
   const joinTeam = async (teamId: number, user: string, teamName: string) => {
     try {
       const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user }),
       });
 
       if (response.ok) {
@@ -111,11 +111,11 @@ export default function HackathonDetailPage() {
         fetchHackathon();
       } else {
         const error = await response.json();
-        alert(`Failed to join team: ${error.error || 'Unknown error'}`);
+        alert(`Failed to join team: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error('Error joining team:', error);
-      alert('Failed to join team. Please try again.');
+      console.error("Error joining team:", error);
+      alert("Failed to join team. Please try again.");
     }
   };
 
@@ -130,114 +130,127 @@ export default function HackathonDetailPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/teams/${teamId}/members?username=${encodeURIComponent(username)}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/teams/${teamId}/members?username=${encodeURIComponent(username)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         alert(`✓ Successfully left "${teamName}"`);
         fetchHackathon();
       } else {
         const error = await response.json();
-        alert(`Failed to leave team: ${error.error || 'Unknown error'}`);
+        alert(`Failed to leave team: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error('Error leaving team:', error);
-      alert('Failed to leave team. Please try again.');
+      console.error("Error leaving team:", error);
+      alert("Failed to leave team. Please try again.");
     }
   };
 
   const handleJoinHackathon = async () => {
     if (!username) {
-      const newUsername = prompt('Enter your username to join:');
+      const newUsername = prompt("Enter your username to join:");
       if (!newUsername || !newUsername.trim()) return;
-      localStorage.setItem('username', newUsername.trim());
+      localStorage.setItem("username", newUsername.trim());
       setUsername(newUsername.trim());
     }
 
     try {
-      const response = await fetch(`/api/hackathons/${hackathonId}/participants`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username || newUsername })
-      });
+      const response = await fetch(
+        `/api/hackathons/${hackathonId}/participants`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: username }),
+        }
+      );
 
       if (response.ok) {
-        alert('✓ Successfully joined the hackathon!');
+        alert("✓ Successfully joined the hackathon!");
         fetchHackathon();
       } else {
         const error = await response.json();
-        alert(`Failed to join: ${error.error || 'Unknown error'}`);
+        alert(`Failed to join: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error('Error joining hackathon:', error);
-      alert('Failed to join. Please try again.');
+      console.error("Error joining hackathon:", error);
+      alert("Failed to join. Please try again.");
     }
   };
 
   const handleLeaveHackathon = async () => {
     if (!username) return;
 
-    const confirmed = confirm('Are you sure you want to leave this hackathon?');
+    const confirmed = confirm("Are you sure you want to leave this hackathon?");
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/hackathons/${hackathonId}/participants?username=${encodeURIComponent(username)}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/hackathons/${hackathonId}/participants?username=${encodeURIComponent(
+          username
+        )}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
-        alert('✓ Successfully left the hackathon');
+        alert("✓ Successfully left the hackathon");
         fetchHackathon();
       } else {
         const error = await response.json();
-        alert(`Failed to leave: ${error.error || 'Unknown error'}`);
+        alert(`Failed to leave: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error('Error leaving hackathon:', error);
-      alert('Failed to leave. Please try again.');
+      console.error("Error leaving hackathon:", error);
+      alert("Failed to leave. Please try again.");
     }
   };
 
   const handleRandomizeTeams = async () => {
-    const teamSizeStr = prompt('Enter desired team size (default is 4):', '4');
+    const teamSizeStr = prompt("Enter desired team size (default is 4):", "4");
     if (!teamSizeStr) return;
 
     const teamSize = parseInt(teamSizeStr);
     if (isNaN(teamSize) || teamSize < 1) {
-      alert('Please enter a valid team size');
+      alert("Please enter a valid team size");
       return;
     }
 
-    const confirmed = confirm(`This will delete all existing teams and create new balanced teams of size ${teamSize}. Continue?`);
+    const confirmed = confirm(
+      `This will delete all existing teams and create new balanced teams of size ${teamSize}. Continue?`
+    );
     if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/hackathons/${hackathonId}/randomize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamSize })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamSize }),
       });
 
       if (response.ok) {
-        alert('✓ Teams randomized successfully!');
+        alert("✓ Teams randomized successfully!");
         fetchHackathon();
       } else {
         const error = await response.json();
-        alert(`Failed to randomize teams: ${error.error || 'Unknown error'}`);
+        alert(`Failed to randomize teams: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error('Error randomizing teams:', error);
-      alert('Failed to randomize teams. Please try again.');
+      console.error("Error randomizing teams:", error);
+      alert("Failed to randomize teams. Please try again.");
     }
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -253,8 +266,13 @@ export default function HackathonDetailPage() {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Hackathon not found</p>
-          <Link href="/hackathons" className="text-blue-600 hover:text-blue-700">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Hackathon not found
+          </p>
+          <Link
+            href="/hackathons"
+            className="text-blue-600 hover:text-blue-700"
+          >
             ← Back to Hackathons
           </Link>
         </div>
@@ -281,7 +299,7 @@ export default function HackathonDetailPage() {
               onClick={() => setShowEditForm(!showEditForm)}
               className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
             >
-              {showEditForm ? 'Cancel Edit' : 'Edit'}
+              {showEditForm ? "Cancel Edit" : "Edit"}
             </button>
           </div>
           {hackathon.description && (
@@ -291,29 +309,30 @@ export default function HackathonDetailPage() {
           )}
           <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
             <div>
-              <span className="font-medium">Start:</span> {formatDate(hackathon.start_date)}
+              <span className="font-medium">Start:</span>{" "}
+              {formatDate(hackathon.start_date)}
             </div>
             <div>
-              <span className="font-medium">End:</span> {formatDate(hackathon.end_date)}
+              <span className="font-medium">End:</span>{" "}
+              {formatDate(hackathon.end_date)}
             </div>
             <div>
-              <span className="font-medium">Mode:</span>{' '}
-              <span className={`px-2 py-1 rounded text-xs ${
-                hackathon.mode === 'random'
-                  ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
-                  : hackathon.mode === 'team-random'
-                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                  : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
-              }`}>
-                {hackathon.mode === 'random'
-                  ? 'Hard Consulting Mode'
-                  : hackathon.mode === 'team-random'
-                  ? 'Random Team Assignment'
-                  : 'Teams Select Ideas'}
+              <span className="font-medium">Mode:</span>{" "}
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  hackathon.mode === "random"
+                    ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                    : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                }`}
+              >
+                {hackathon.mode === "random"
+                  ? "Hard Mode"
+                  : "Teams Select Ideas"}
               </span>
             </div>
             <div>
-              <span className="font-medium">Created by:</span> {hackathon.creator_username}
+              <span className="font-medium">Created by:</span>{" "}
+              {hackathon.creator_username}
             </div>
           </div>
         </header>
@@ -330,12 +349,14 @@ export default function HackathonDetailPage() {
           {/* Ideas Section */}
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Selected Ideas ({hackathon.ideas.length})</h2>
+              <h2 className="text-2xl font-bold">
+                Selected Ideas ({hackathon.ideas.length})
+              </h2>
               <button
                 onClick={() => setShowIdeaSelector(!showIdeaSelector)}
                 className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
               >
-                {showIdeaSelector ? 'Close' : '+ Add Ideas'}
+                {showIdeaSelector ? "Close" : "+ Add Ideas"}
               </button>
             </div>
 
@@ -384,12 +405,14 @@ export default function HackathonDetailPage() {
           {/* Teams Section */}
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Teams ({hackathon.teams.length})</h2>
+              <h2 className="text-2xl font-bold">
+                Teams ({hackathon.teams.length})
+              </h2>
               <button
                 onClick={() => setShowTeamForm(!showTeamForm)}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
               >
-                {showTeamForm ? 'Cancel' : '+ Create Team'}
+                {showTeamForm ? "Cancel" : "+ Create Team"}
               </button>
             </div>
 
@@ -422,7 +445,9 @@ export default function HackathonDetailPage() {
                         <div className="flex gap-2">
                           {userInTeam ? (
                             <button
-                              onClick={() => handleLeaveTeam(team.id, team.name)}
+                              onClick={() =>
+                                handleLeaveTeam(team.id, team.name)
+                              }
                               className="text-sm px-3 py-1 rounded transition-colors bg-red-600 hover:bg-red-700 text-white"
                             >
                               Leave Team
@@ -437,30 +462,32 @@ export default function HackathonDetailPage() {
                           )}
                         </div>
                       </div>
-                    {team.idea_title && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Working on: <span className="font-medium">{team.idea_title}</span>
-                      </p>
-                    )}
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      <p className="mb-1">
-                        Created by {team.creator_username} • {team.member_count} member
-                        {team.member_count !== 1 ? 's' : ''}
-                      </p>
-                      {team.members && team.members.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {team.members.map((member, idx) => (
-                            <span
-                              key={idx}
-                              className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs"
-                            >
-                              {member}
-                            </span>
-                          ))}
-                        </div>
+                      {team.idea_title && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          Working on:{" "}
+                          <span className="font-medium">{team.idea_title}</span>
+                        </p>
                       )}
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="mb-1">
+                          Created by {team.creator_username} •{" "}
+                          {team.member_count} member
+                          {team.member_count !== 1 ? "s" : ""}
+                        </p>
+                        {team.members && team.members.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {team.members.map((member, idx) => (
+                              <span
+                                key={idx}
+                                className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs"
+                              >
+                                {member}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>
