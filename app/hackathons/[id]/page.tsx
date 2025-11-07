@@ -114,6 +114,30 @@ export default function HackathonDetailPage() {
     return team.members?.includes(username) || false;
   };
 
+  const handleLeaveTeam = async (teamId: number, teamName: string) => {
+    if (!username) return;
+
+    const confirmed = confirm(`Are you sure you want to leave "${teamName}"?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/teams/${teamId}/members?username=${encodeURIComponent(username)}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert(`✓ Successfully left "${teamName}"`);
+        fetchHackathon();
+      } else {
+        const error = await response.json();
+        alert(`Failed to leave team: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error leaving team:', error);
+      alert('Failed to leave team. Please try again.');
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -268,17 +292,23 @@ export default function HackathonDetailPage() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-semibold">{team.name}</h3>
-                        <button
-                          onClick={() => handleJoinTeam(team.id, team.name)}
-                          disabled={userInTeam}
-                          className={`text-sm px-3 py-1 rounded transition-colors ${
-                            userInTeam
-                              ? 'bg-gray-400 cursor-not-allowed text-white'
-                              : 'bg-blue-600 hover:bg-blue-700 text-white'
-                          }`}
-                        >
-                          {userInTeam ? '✓ Joined' : 'Join'}
-                        </button>
+                        <div className="flex gap-2">
+                          {userInTeam ? (
+                            <button
+                              onClick={() => handleLeaveTeam(team.id, team.name)}
+                              className="text-sm px-3 py-1 rounded transition-colors bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              Leave Team
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleJoinTeam(team.id, team.name)}
+                              className="text-sm px-3 py-1 rounded transition-colors bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              Join
+                            </button>
+                          )}
+                        </div>
                       </div>
                     {team.idea_title && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
