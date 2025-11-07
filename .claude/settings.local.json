@@ -6,7 +6,10 @@
       "Bash(cat:*)",
       "Bash(npm install:*)",
       "Bash(test:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(curl:*)",
+      "Bash(json_pp:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
